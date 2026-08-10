@@ -22,7 +22,6 @@ networkx==3.6.1
 numpy==2.5.1
 onnx==1.22.0
 onnxruntime==1.28.0
-opencv-python==5.0.0.93
 opencv-python-headless==5.0.0.93
 packaging==26.3
 passlib==1.7.4
