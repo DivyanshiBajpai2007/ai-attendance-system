@@ -6,6 +6,7 @@ import cv2
 from app.auth import require_role
 from app.database import Embedding, Employee, get_db
 from app.face_engine import detect_and_embed
+from app.quality_checks import run_quality_checks
 
 router = APIRouter()
 
@@ -31,6 +32,10 @@ async def enroll(
     if len(results) > 1:
         raise HTTPException(status_code=400, detail='Multiple faces detected. Please submit a photo with only one person.')
 
+    quality = run_quality_checks(image_bgr, results[0]['bbox'])
+    if not quality['passed']:
+        raise HTTPException(status_code=400, detail={'message': 'Photo quality too low, please retake', 'issues': quality['issues']})
+
     embedding_vector = results[0]['embedding'].tolist()
 
     employee = db.query(Employee).filter(Employee.employee_code == employee_code).first()
@@ -50,4 +55,5 @@ async def enroll(
         'employee_code': employee.employee_code,
         'name': employee.name,
         'embedding_id': new_embedding.id,
+        'quality': quality,
     }
